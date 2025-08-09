@@ -7,7 +7,10 @@ import { AppProgressBar as ProgressBar } from "next-nprogress-bar";
 import { useTheme } from "next-themes";
 import { Toaster } from "react-hot-toast";
 import { WagmiProvider } from "wagmi";
+import FloatingExplorer from "~~/components/FloatingExplorer";
+import FloatingThemeToggle from "~~/components/FloatingThemeToggle";
 import { Footer } from "~~/components/Footer";
+import GlobalNav from "~~/components/GlobalNav";
 import { Header } from "~~/components/Header";
 import { BlockieAvatar } from "~~/components/scaffold-eth";
 import { useInitializeNativeCurrencyPrice } from "~~/hooks/scaffold-eth";
@@ -36,26 +39,53 @@ export const queryClient = new QueryClient({
   },
 });
 
-export const ScaffoldEthAppWithProviders = ({ children }: { children: React.ReactNode }) => {
+// export const ScaffoldEthAppWithProviders = ({ children }: { children: React.ReactNode }) => {
+//   const { resolvedTheme } = useTheme();
+//   const isDarkMode = resolvedTheme === "dark";
+//   const [mounted, setMounted] = useState(false);
+
+//   useEffect(() => {
+//     setMounted(true);
+//   }, []);
+
+//   return (
+//     <WagmiProvider config={wagmiConfig}>
+//       <QueryClientProvider client={queryClient}>
+//         <RainbowKitProvider
+//           avatar={BlockieAvatar}
+//           theme={mounted ? (isDarkMode ? darkTheme() : lightTheme()) : lightTheme()}
+//         >
+//           <ProgressBar height="3px" color="#2299dd" />
+//           <ScaffoldEthApp>{children}</ScaffoldEthApp>
+//         </RainbowKitProvider>
+//       </QueryClientProvider>
+//     </WagmiProvider>
+//   );
+// };
+
+export function ScaffoldEthAppWithProviders({ children }: { children: React.ReactNode }) {
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
   const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useEffect(() => setMounted(true), []);
 
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider
-          avatar={BlockieAvatar}
-          theme={mounted ? (isDarkMode ? darkTheme() : lightTheme()) : lightTheme()}
-        >
-          <ProgressBar height="3px" color="#2299dd" />
-          <ScaffoldEthApp>{children}</ScaffoldEthApp>
+        <RainbowKitProvider>
+          <ProgressBar />
+          <GlobalNav />
+
+          <div className="flex flex-col min-h-screen">
+            <main className="relative flex flex-col flex-1">{children}</main>
+          </div>
+
+          <FloatingThemeToggle />
+          <FloatingExplorer />
+
+          <Toaster />
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
   );
-};
+}

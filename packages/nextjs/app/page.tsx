@@ -1,125 +1,149 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { ethers } from "ethers";
 import { useAccount } from "wagmi";
 
 export default function Home() {
   /* ------------------------------------------------------------------ */
-  /* Dummy numbers – replace with real contract reads later               */
-  const population = 12_345;
-  const deaths = 432;
+
+  const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ?? "";
+  const CONTRACT_ABI = ["function totalBound() view returns (uint256)", "function totalSBT()   view returns (uint256)"];
+
+  const [population, setPopulation] = useState(0);
+  const [deaths, setDeaths] = useState(0);
+
+  async function loadStats() {
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
+      const [bound, sbt] = await Promise.all([contract.totalBound(), contract.totalSBT()]);
+      setPopulation(Number(bound));
+      setDeaths(Number(sbt));
+    } catch {
+      /* ignore and keep 0 */
+    }
+  }
+
+  useEffect(() => {
+    loadStats();
+  }, []);
   /* ------------------------------------------------------------------ */
 
   const { isConnected } = useAccount();
+  useEffect(() => {
+    loadStats(); // re-run when connection changes
+  }, [isConnected]);
+
+  /* ---------- Search-status state ---------- */
+  const [nric, setNric] = useState("");
+  const [tokenId, setTokenId] = useState<string | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+
+  /* ---------- Lookup ---------- */
+  const handleLookup = async () => {
+    if (!nric.trim()) return;
+    setIsSearching(true);
+    setStatus(null);
+    setTokenId(null);
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:3001"}/search-by-nric/${encodeURIComponent(nric)}`,
+      );
+
+      if (res.ok) {
+        const data = await res.json();
+        setTokenId(String(data.tokenId ?? "-"));
+        setStatus("Death");
+      } else {
+        setStatus("Alive");
+      }
+    } catch {
+      setStatus("Alive");
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
   return (
-    <>
-      {/* ---------- Sticky Nav ---------- */}
-      <header className="sticky top-0 z-30 bg-base-100/80 backdrop-blur border-b border-base-300">
-        <nav className="navbar container mx-auto px-4">
-          <div className="flex-1">
-            <Link href="/" className="btn btn-ghost normal-case text-xl">
-              Eternal Ledger
-            </Link>
-          </div>
+    <main className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 text-slate-800 dark:text-slate-100">
+      <div className="max-w-4xl mx-auto px-6 py-16 space-y-12">
+        {/* ---------- Hero ---------- */}
+        <header className="text-center space-y-4">
+          <h1 className="text-5xl md:text-6xl font-light">
+            Eternal Ledger
+            <span className="block text-indigo-500 dark:text-indigo-400 font-normal">
+              On-chain Life & Legacy Registry
+            </span>
+          </h1>
+          <p className="max-w-2xl mx-auto text-slate-600 dark:text-slate-300">
+            A privacy-aware, soulbound, tamper-proof lifecycle registry from birth to death, built on Polygon and
+            Scaffold-ETH 2.
+          </p>
+        </header>
 
-          <div className="flex-none hidden sm:flex items-center gap-2">
-            <Link href="/dashboard" className="btn btn-ghost btn-sm">
-              User Dashboard
-            </Link>
-            <Link href="/birth" className="btn btn-ghost btn-sm">
-              Birth Registration
-            </Link>
-            <Link href="/death" className="btn btn-ghost btn-sm">
-              Death Verification
-            </Link>
-          </div>
+        {/* ---------- Live counters ---------- */}
+        <section className="grid md:grid-cols-2 gap-6 max-w-lg mx-auto">
+          <article className="bg-white/70 dark:bg-slate-800/70 rounded-2xl shadow-sm p-6 text-center backdrop-blur">
+            <h3 className="text-sm text-slate-500 dark:text-slate-400">Population Registered</h3>
+            <p className="text-3xl font-semibold text-slate-900 dark:text-slate-100">{population.toLocaleString()}</p>
+          </article>
 
-          {/* Mobile burger */}
-          <div className="dropdown dropdown-end sm:hidden">
-            <label tabIndex={0} className="btn btn-ghost btn-circle">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 6h16M4 12h16M4 18h7"
-                />
-              </svg>
-            </label>
-            <ul
-              tabIndex={0}
-              className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
-            >
-              <li>
-                <Link href="/dashboard">User Dashboard</Link>
-              </li>
-              <li>
-                <Link href="/birth">Birth Registration</Link>
-              </li>
-              <li>
-                <Link href="/death">Death Verification</Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* RainbowKit button stays on the right */}
-          <div className="ml-4">
-            <ConnectButton showBalance={false} />
-          </div>
-        </nav>
-      </header>
-
-      {/* ---------- Hero Section ---------- */}
-      <main className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center px-4 sm:px-6 text-center gap-6">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight">
-          Eternal Ledger
-          <span className="block text-primary">On-chain Life & Legacy Registry</span>
-        </h1>
-
-        <p className="max-w-2xl text-base sm:text-lg opacity-80">
-          A privacy-aware, soulbound, tamper-proof lifecycle registry from birth to death,
-          built on Polygon and Scaffold-ETH 2.
-        </p>
-
-        {/* Live counters */}
-        <section className="stats stats-vertical md:stats-horizontal bg-base-200/50 shadow my-4">
-          <div className="stat">
-            <div className="stat-title text-base-content/70">Population Registered</div>
-            <div className="stat-value text-primary">{population.toLocaleString()}</div>
-            <div className="stat-desc">Identities bound to wallets</div>
-          </div>
-          <div className="stat">
-            <div className="stat-title text-base-content/70">Death Certificates</div>
-            <div className="stat-value text-secondary">{deaths.toLocaleString()}</div>
-            <div className="stat-desc">EternalLedger SBTs issued</div>
-          </div>
+          <article className="bg-white/70 dark:bg-slate-800/70 rounded-2xl shadow-sm p-6 text-center backdrop-blur">
+            <h3 className="text-sm text-slate-500 dark:text-slate-400">Death Certificates</h3>
+            <p className="text-3xl font-semibold text-slate-900 dark:text-slate-100">{deaths.toLocaleString()}</p>
+          </article>
         </section>
 
-        {/* CTA buttons */}
-        <div className="flex flex-col sm:flex-row gap-4">
+        {/* ---------- Status Check Card ---------- */}
+        <section className="max-w-md mx-auto bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-8 space-y-5">
+          <h2 className="text-xl font-medium text-center text-slate-800 dark:text-slate-100">Check Status</h2>
+
+          <div className="flex gap-3">
+            <input
+              type="text"
+              placeholder="Your NRIC"
+              value={nric}
+              onChange={e => setNric(e.target.value)}
+              className="flex-1 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+            <button
+              onClick={handleLookup}
+              disabled={isSearching || !nric}
+              className="px-5 py-2 text-sm font-medium rounded-lg bg-indigo-200 hover:bg-indigo-400 disabled:opacity-100 transition-colors"
+            >
+              {"Lookup"}
+            </button>
+          </div>
+
+          {status && (
+            <p className="text-center text-sm">
+              Status: <span className={status === "Death" ? "text-red-500" : "text-green-500"}>{status}</span>
+            </p>
+          )}
+        </section>
+
+        {/* ---------- CTA buttons ---------- */}
+        <section className="flex justify-center gap-4">
           <Link href="/dashboard">
-            <button className="btn btn-primary w-full sm:w-48">
+            <button className="btn btn-primary min-w-[180px]">
               {isConnected ? "My Dashboard" : "Connect & Enter"}
             </button>
           </Link>
           <Link href="/death">
-            <button className="btn btn-outline w-full sm:w-48">Verify Death</button>
+            <button className="btn btn-outline min-w-[180px]">Verify Death</button>
           </Link>
-        </div>
-      </main>
+        </section>
 
-      {/* ---------- Footer ---------- */}
-      <footer className="text-center py-6 text-xs opacity-60">
-        This is a prototype – use at your own risk.
-      </footer>
-    </>
+        {/* RainbowKit button stays in header on scroll */}
+        <div className="fixed top-4 right-4">
+          <ConnectButton />
+        </div>
+      </div>
+    </main>
   );
 }

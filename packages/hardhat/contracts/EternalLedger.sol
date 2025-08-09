@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 /// @dev EIP-5192 compliant Soulbound Token for death certificates. Every token represents a deceased person.
 contract EternalLedger is ERC721, Ownable {
     using Strings for uint256;
-    
+
     uint96 public deploymentTs;
 
     struct Record {
@@ -60,6 +60,9 @@ contract EternalLedger is ERC721, Ownable {
         emit RegistrarRevoked(registrar);
     }
 
+    uint256 public totalBound = 0;
+    uint256 public totalSBT = 0;
+
     /// @notice Bind NRIC to wallet address (birth registration or eKYC)
     /// @param nric National Registration Identity Card number
     /// @param wallet Wallet address to bind to
@@ -71,6 +74,8 @@ contract EternalLedger is ERC721, Ownable {
 
         nricToWallet[nric] = wallet;
         walletToNric[wallet] = nric;
+
+        totalBound++;
 
         emit IdentityBound(nric, wallet);
     }
@@ -95,6 +100,7 @@ contract EternalLedger is ERC721, Ownable {
 
         hasDied[nric] = true;
         totalSupply++;
+        totalSBT++;
 
         emit DeathRecorded(nric, tokenId, metadataCID);
     }
