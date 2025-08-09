@@ -76,6 +76,7 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
+
   *,
   ::after,
   ::before,
@@ -104,6 +105,14 @@
 :root,
 [data-theme] {
   background: var(--color-base-200);
+}
+
+:root {
+  --color-alive: #34d399;
+  --color-deceased: #ef4444;
+  --color-pending: #f59e0b;
+  --color-bg: #f9fafb;
+  --color-card: #ffffff;
 }
 
 .btn {
