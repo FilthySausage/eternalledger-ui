@@ -24,9 +24,6 @@ export default function GlobalNav() {
           <Link href="/death" className="btn btn-ghost btn-sm">
             Death Verification
           </Link>
-          <Link href="/blockexplorer" className="btn btn-ghost btn-sm">
-            Explorer
-          </Link>
         </div>
 
         {/* mobile */}
@@ -51,9 +48,6 @@ export default function GlobalNav() {
             </li>
             <li>
               <Link href="/death">Death Verification</Link>
-            </li>
-            <li>
-              <Link href="/blockexplorer">Explorer</Link>
             </li>
           </ul>
         </div>

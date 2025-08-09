@@ -129,13 +129,11 @@ export default function Home() {
 
         {/* ---------- CTA buttons ---------- */}
         <section className="flex justify-center gap-4">
-          <Link href="/dashboard">
-            <button className="btn btn-primary min-w-[180px]">
-              {isConnected ? "My Dashboard" : "Connect & Enter"}
-            </button>
+          <Link href="/login">
+            <button className="btn btn-primary min-w-[180px]">Enter Portal</button>
           </Link>
-          <Link href="/death">
-            <button className="btn btn-outline min-w-[180px]">Verify Death</button>
+          <Link href="/public">
+            <button className="btn btn-outline min-w-[180px]">Public Search</button>
           </Link>
         </section>
 
