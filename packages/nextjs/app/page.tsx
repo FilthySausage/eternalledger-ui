@@ -3,25 +3,20 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { ethers } from "ethers";
 import { useAccount } from "wagmi";
 
 export default function Home() {
   /* ------------------------------------------------------------------ */
-
-  const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ?? "";
-  const CONTRACT_ABI = ["function totalBound() view returns (uint256)", "function totalSBT()   view returns (uint256)"];
-
-  const [population, setPopulation] = useState(0);
+  const [population] = useState(1000000); // Hardcoded population
   const [deaths, setDeaths] = useState(0);
 
   async function loadStats() {
     try {
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
-      const [bound, sbt] = await Promise.all([contract.totalBound(), contract.totalSBT()]);
-      setPopulation(Number(bound));
-      setDeaths(Number(sbt));
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:3001"}/total-supply`);
+      if (res.ok) {
+        const data = await res.json();
+        setDeaths(Number(data.totalSupply) || 0);
+      }
     } catch {
       /* ignore and keep 0 */
     }

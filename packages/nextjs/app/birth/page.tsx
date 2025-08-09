@@ -31,7 +31,7 @@ export default function BirthRegistrationPage() {
       // 404 falls through → continue generating wallet
     } catch {}
     const randomWallet = ethers.Wallet.createRandom();
-    setWallet("0xdD2FD4581271e230360230F9337D5c0430Bf44C0");
+    setWallet("0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f");
     setMnemonic(randomWallet.mnemonic?.phrase ?? "");
     setStatus("Wallet generated. Save the mnemonic securely.");
   };
