@@ -1,17 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
 
 export default function DashboardPage() {
-  /* ---------------------------------------------------- */
-  /* Dummy numbers – replace with contract reads later    */
-  const population = 12_345;
-  const deaths = 432;
-  /* ---------------------------------------------------- */
-
   const { address, isConnected } = useAccount();
 
   /* mock eKYC state */
@@ -36,6 +30,25 @@ export default function DashboardPage() {
     /* later: open modal / sign message / mint identity NFT */
     setEkycDone(true);
   };
+
+  const [population] = useState(1000000);
+  const [deaths, setDeaths] = useState(0);
+
+  async function loadStats() {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:3001"}/total-supply`);
+      if (res.ok) {
+        const data = await res.json();
+        setDeaths(Number(data.totalSupply) || 0);
+      }
+    } catch {
+      /* ignore and keep 0 */
+    }
+  }
+
+  useEffect(() => {
+    loadStats();
+  }, []);
 
   return (
     <>

@@ -60,9 +60,14 @@ export default function DeathRecordPage() {
     }
   };
 
+  const [txStatus, setTxStatus] = useState<"idle" | "success" | "error">("idle");
+  const [txMsg, setTxMsg] = useState("");
+
   const handleConfirm = async () => {
     if (!cid) return;
     setIsRecording(true);
+    setTxStatus("idle");
+    setTxMsg("");
 
     try {
       const res = await fetch(`${backendUrl}/record-death`, {
@@ -71,14 +76,15 @@ export default function DeathRecordPage() {
         body: JSON.stringify({ nric, metadataCID: cid }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error);
 
-      // ✨  Modern toast + redirect after 2 s
-      setTimeout(() => {
-        window.location.href = `/storage/${cid}`; // <-- your storage view route
-      }, 2000);
+      if (!res.ok) throw new Error(json.error ?? "Unknown error");
+
+      setTxStatus("success");
+      setTxMsg(`Success: Soul-bound Token minted!`);
     } catch (e: any) {
-      alert("Transaction failed: " + e.message);
+      setTxStatus("error");
+      // friendly message only
+      setTxMsg("Error: Minting failed. The person may already be recorded as deceased.");
     } finally {
       setIsRecording(false);
     }
@@ -182,14 +188,55 @@ export default function DeathRecordPage() {
 
       {/* Confirm */}
       {cid && (
-        <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-8">
-          <button
-            onClick={handleConfirm}
-            disabled={disabled || isRecording}
-            className="w-full px-4 py-2 text-sm font-medium rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-colors disabled:opacity-50"
-          >
-            {isRecording ? "Minting… Redirecting in 2 s" : "Confirm & Mint SBT"}
-          </button>
+        <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-8 space-y-4">
+          {txStatus === "idle" && (
+            <button
+              onClick={handleConfirm}
+              disabled={disabled || isRecording}
+              className="w-full px-4 py-2 text-sm font-medium rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-colors disabled:opacity-50"
+            >
+              {isRecording ? "Minting…" : "Confirm & Mint SBT"}
+            </button>
+          )}
+
+          {/* Success dialogue */}
+          {txStatus === "success" && (
+            <div className="space-y-4 text-center">
+              <p className="text-emerald-700 dark:text-emerald-300 font-medium">{txMsg}</p>
+              <div className="flex gap-4 justify-center">
+                <button
+                  onClick={() => (window.location.href = "/")}
+                  className="px-6 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm"
+                >
+                  Back to Home
+                </button>
+                <button
+                  onClick={() => {
+                    setNric("");
+                    setDetails({ fullName: "", cause: "", location: "", deathDate: "" });
+                    setCid(null);
+                    setTxStatus("idle");
+                  }}
+                  className="px-6 py-2 rounded-lg bg-slate-600 hover:bg-slate-700 text-white text-sm"
+                >
+                  OK (Reset)
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Error dialogue */}
+          {txStatus === "error" && (
+            <div className="text-center">
+              <p className="text-red-700 dark:text-red-300 font-medium">{txMsg}</p>
+              <button
+                onClick={() => setTxStatus("idle")}
+                className="mt-4 px-6 py-2 rounded-lg bg-slate-600 hover:bg-slate-700 text-white text-sm"
+              >
+                Try Again
+              </button>
+            </div>
+          )}
         </section>
       )}
     </main>
