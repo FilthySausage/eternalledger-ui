@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import { isAddress } from "viem";
 import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
@@ -7,15 +8,16 @@ export const BirthForm = () => {
   const [nric, setNric] = useState("");
   const [wallet, setWallet] = useState("");
 
-  const { writeContractAsync } = useScaffoldWriteContract({
-    contractName: "EternalLedger",
-    functionName: "bindIdentity",
-  });
+  const { writeContractAsync } = useScaffoldWriteContract("EternalLedger");
 
   const handleSubmit = async () => {
     if (!nric || !wallet) return alert("Fill NRIC & wallet");
     if (!isAddress(wallet)) return alert("Invalid address");
-    await (writeContractAsync as any)({ args: [nric, wallet] });
+
+    await writeContractAsync({
+      functionName: "bindIdentity",
+      args: [nric, wallet],
+    });
     alert("Birth identity bound!");
   };
 
@@ -27,13 +29,13 @@ export const BirthForm = () => {
           className="input input-bordered"
           placeholder="Birth ID (NRIC)"
           value={nric}
-          onChange={(e) => setNric(e.target.value)}
+          onChange={e => setNric(e.target.value)}
         />
         <input
           className="input input-bordered"
           placeholder="Wallet 0x..."
           value={wallet}
-          onChange={(e) => setWallet(e.target.value)}
+          onChange={e => setWallet(e.target.value)}
         />
         <button className="btn btn-primary mt-2" onClick={handleSubmit}>
           Bind Identity

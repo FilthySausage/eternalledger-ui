@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 
@@ -7,10 +8,7 @@ export const DeathForm = () => {
   const [cid, setCid] = useState("");
   const [file, setFile] = useState<File | null>(null);
 
-  const { writeContractAsync } = useScaffoldWriteContract({
-    contractName: "EternalLedger",
-    functionName: "recordDeath",
-  });
+  const { writeContractAsync } = useScaffoldWriteContract("EternalLedger");
 
   const handleUpload = async () => {
     if (!file) return alert("Select file");
@@ -23,7 +21,11 @@ export const DeathForm = () => {
 
   const handleSubmit = async () => {
     if (!nric || !cid) return alert("Need NRIC & metadata CID");
-    await (writeContractAsync as any)({ args: [nric, cid] });
+
+    await writeContractAsync({
+      functionName: "recordDeath",
+      args: [nric, cid],
+    });
     alert("Death recorded & SDT minted!");
   };
 
@@ -35,12 +37,12 @@ export const DeathForm = () => {
           className="input input-bordered"
           placeholder="Birth ID (NRIC)"
           value={nric}
-          onChange={(e) => setNric(e.target.value)}
+          onChange={e => setNric(e.target.value)}
         />
         <input
           type="file"
           className="file-input file-input-bordered w-full"
-          onChange={(e) => setFile(e.target.files?.[0] || null)}
+          onChange={e => setFile(e.target.files?.[0] || null)}
         />
         <button className="btn btn-sm" onClick={handleUpload}>
           Upload → IPFS
