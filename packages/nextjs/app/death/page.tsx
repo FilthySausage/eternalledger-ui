@@ -92,7 +92,7 @@ export default function DeathRecordPage() {
 
       {/* NRIC Check */}
       <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-8 space-y-6">
-        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Child NRIC</label>
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">NRIC</label>
         <div className="flex gap-4">
           <input
             className="flex-1 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-transparent"
