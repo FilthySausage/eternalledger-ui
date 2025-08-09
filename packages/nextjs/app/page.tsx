@@ -11,7 +11,6 @@ export default function Home() {
 
   const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ?? "";
   const CONTRACT_ABI = ["function totalBound() view returns (uint256)", "function totalSBT()   view returns (uint256)"];
-
   const [population, setPopulation] = useState(0);
   const [deaths, setDeaths] = useState(0);
 
@@ -19,7 +18,10 @@ export default function Home() {
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
+
+      /* parallel read */
       const [bound, sbt] = await Promise.all([contract.totalBound(), contract.totalSBT()]);
+
       setPopulation(Number(bound));
       setDeaths(Number(sbt));
     } catch {
