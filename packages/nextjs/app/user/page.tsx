@@ -1,59 +1,53 @@
 "use client";
+
 import { useState } from "react";
-import { StatusChip } from "~~/components/StatusChip";
+import { useRouter } from "next/navigation";
+import { useAccount } from "wagmi";
+import Button from "~~/components/ui/Button";
+import MetricCard from "~~/components/ui/MetricCard";
+import { useDeathStats } from "~~/hooks/features/useDeathStats";
+import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
+import { useRoleStore } from "~~/services/store/roleStore";
 
 export default function UserDashboard() {
-  const [consent, setConsent] = useState({ pension: true, bank: false, dApps: true });
-  const mockEvents = [
-    { type: "Birth", date: "1990-03-14" },
-    { type: "Death", date: "—", status: "alive" },
-  ];
+  const { address } = useAccount();
+  const router = useRouter();
+  const { role } = useRoleStore();
+  if (role !== "user" && typeof window !== "undefined") {
+    router.replace("/login");
+  }
+  const { totalDeaths } = useDeathStats();
+  const [nric, setNric] = useState("");
+  const { data: tokenId } = (useScaffoldReadContract as any)({
+    contractName: "EternalLedger",
+    functionName: "getTokenByNric",
+    args: [nric],
+  });
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-3xl">
-      <h1 className="text-3xl font-bold mb-6">User Dashboard</h1>
-
-      {/* Identity card */}
-      <div className="card bg-base-100 shadow mb-6">
-        <div className="card-body">
-          <h2 className="card-title">Identity Overview</h2>
-          <p><strong>Birth ID:</strong> S1234567A</p>
-          <div className="flex items-center gap-2">
-            <span>Status:</span>
-            <StatusChip status="alive" />
-          </div>
-        </div>
-      </div>
-
-      {/* Timeline */}
-      <div className="mb-6">
-        <h3 className="text-xl font-semibold mb-2">Lifecycle Timeline</h3>
-        <ul className="steps steps-vertical">
-          {mockEvents.map((e, i) => (
-            <li key={i} className="step step-primary">
-              {e.type} – {e.date}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Automation toggles */}
-      <div className="card bg-base-100 shadow">
-        <div className="card-body">
-          <h3 className="card-title">Automation Consent</h3>
-          {Object.entries(consent).map(([key, val]) => (
-            <div key={key} className="flex justify-between items-center">
-              <span className="capitalize">{key}</span>
-              <input
-                type="checkbox"
-                className="toggle toggle-primary"
-                checked={val}
-                onChange={() => setConsent({ ...consent, [key]: !val })}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
+    <main className="p-6 space-y-8 max-w-4xl mx-auto">
+      <header className="flex flex-col gap-2">
+        <h1 className="text-3xl font-bold">User Dashboard</h1>
+        <p className="text-sm opacity-70">Wallet: {address ?? "(not connected)"}</p>
+      </header>
+      <section className="grid md:grid-cols-3 gap-4">
+        <MetricCard label="Total Deaths" value={totalDeaths} />
+        <MetricCard label="Your Token Id" value={tokenId ? Number(tokenId).toString() : "-"} />
+        <MetricCard label="Subscriptions" value={"-"} hint="Feature TBD" />
+      </section>
+      <section className="card bg-base-100 shadow p-6 flex flex-col gap-3">
+        <h2 className="text-xl font-semibold">Check Status</h2>
+        <input
+          className="input input-bordered"
+          placeholder="Your NRIC"
+          value={nric}
+          onChange={e => setNric(e.target.value)}
+        />
+        <Button variant="primary" onClick={() => {}}>
+          Lookup
+        </Button>
+        {tokenId && <p className="text-sm">Linked Death Certificate Token: {Number(tokenId)}</p>}
+      </section>
+    </main>
   );
 }
