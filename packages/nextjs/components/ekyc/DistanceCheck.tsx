@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 // tiny wrapper around the ML code your teammate wrote
-import { verify } from "@/lib/eKYC";
+import { verify } from "@/lib/eKYC/index";
 
 export function DistanceCheck({
   uploadFile,

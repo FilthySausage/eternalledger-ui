@@ -1,5 +1,6 @@
+// src/components/ekyc/CameraCapture.tsx
 "use client";
-import { useRef, useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 
 export function CameraCapture({
   onNext,
@@ -10,10 +11,16 @@ export function CameraCapture({
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [stream, setStream] = useState<MediaStream | null>(null);
 
   useEffect(() => {
-    navigator.mediaDevices.getUserMedia({ video: true }).then(setStream);
+    let stream: MediaStream;
+    navigator.mediaDevices
+      .getUserMedia({ video: true })
+      .then((s) => {
+        stream = s;
+        if (videoRef.current) videoRef.current.srcObject = s;
+      })
+      .catch(console.error);
     return () => stream?.getTracks().forEach((t) => t.stop());
   }, []);
 
@@ -30,8 +37,8 @@ export function CameraCapture({
     <div className="flex flex-col gap-4 items-center">
       <video
         ref={videoRef}
-        srcObject={stream!}
         autoPlay
+        muted
         playsInline
         className="w-full max-w-sm rounded"
       />
