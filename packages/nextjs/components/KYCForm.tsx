@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import { useEffect } from "react";
 import { useAccount } from "wagmi";
 import Button from "~~/components/ui/Button";
 import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
@@ -118,6 +119,11 @@ export default function KYCForm({ onSuccess, onCancel }: KYCFormProps) {
   const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 4));
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
+  useEffect(() => {
+    if (cameraActive && videoRef.current && stream) {
+      videoRef.current.srcObject = stream;
+    }
+  }, [cameraActive, stream]);
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-6 space-y-6">
       {/* Progress Steps */}
