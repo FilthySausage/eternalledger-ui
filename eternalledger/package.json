@@ -1,0 +1,60 @@
+{
+  "name": "se-2",
+  "version": "0.0.1",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ]
+  },
+  "scripts": {
+    "account": "yarn hardhat:account",
+    "account:generate": "yarn workspace @eternal/hardhat account:generate",
+    "account:import": "yarn workspace @eternal/hardhat account:import",
+    "account:reveal-pk": "yarn workspace @eternal/hardhat account:reveal-pk",
+    "chain": "yarn hardhat:chain",
+    "compile": "yarn hardhat:compile",
+    "deploy": "yarn hardhat:deploy",
+    "fork": "yarn hardhat:fork",
+    "format": "yarn next:format && yarn hardhat:format",
+    "generate": "yarn account:generate",
+    "hardhat:account": "yarn workspace @eternal/hardhat account",
+    "hardhat:chain": "yarn workspace @eternal/hardhat chain",
+    "hardhat:check-types": "yarn workspace @eternal/hardhat check-types",
+    "hardhat:clean": "yarn workspace @eternal/hardhat clean",
+    "hardhat:compile": "yarn workspace @eternal/hardhat compile",
+    "hardhat:deploy": "yarn workspace @eternal/hardhat deploy",
+    "hardhat:flatten": "yarn workspace @eternal/hardhat flatten",
+    "hardhat:fork": "yarn workspace @eternal/hardhat fork",
+    "hardhat:format": "yarn workspace @eternal/hardhat format",
+    "hardhat:generate": "yarn workspace @eternal/hardhat generate",
+    "hardhat:hardhat-verify": "yarn workspace @eternal/hardhat hardhat-verify",
+    "hardhat:lint": "yarn workspace @eternal/hardhat lint",
+    "hardhat:lint-staged": "yarn workspace @eternal/hardhat lint-staged",
+    "hardhat:test": "yarn workspace @eternal/hardhat test",
+    "hardhat:verify": "yarn workspace @eternal/hardhat verify",
+    "postinstall": "husky install",
+    "ipfs": "yarn workspace @eternal/nextjs ipfs",
+    "lint": "yarn next:lint && yarn hardhat:lint",
+    "next:build": "yarn workspace @eternal/nextjs build",
+    "next:check-types": "yarn workspace @eternal/nextjs check-types",
+    "next:format": "yarn workspace @eternal/nextjs format",
+    "next:lint": "yarn workspace @eternal/nextjs lint",
+    "next:serve": "yarn workspace @eternal/nextjs serve",
+    "precommit": "lint-staged",
+    "start": "yarn workspace @eternal/nextjs dev",
+    "test": "yarn hardhat:test",
+    "vercel": "yarn workspace @eternal/nextjs vercel",
+    "vercel:login": "yarn workspace @eternal/nextjs vercel:login",
+    "vercel:yolo": "yarn workspace @eternal/nextjs vercel:yolo",
+    "verify": "yarn hardhat:verify"
+  },
+  "devDependencies": {
+    "husky": "~9.1.6",
+    "lint-staged": "~13.2.2"
+  },
+  "packageManager": "yarn@3.2.3",
+  "engines": {
+    "node": ">=20.18.3"
+  }
+}
